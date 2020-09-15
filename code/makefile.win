@@ -85,6 +85,7 @@ PROMINENCE_OBJS = \
 	$(OUTDIR)/filter.obj \
 	$(OUTDIR)/island_tree.obj \
 	$(OUTDIR)/kml_writer.obj \
+	$(OUTDIR)/kml_writer_2.obj \
 	$(OUTDIR)/latlng.obj \
 	$(OUTDIR)/line_tree.obj \
 	$(OUTDIR)/peakbagger_collection.obj \
@@ -104,6 +105,7 @@ MERGE_DIVIDE_TREES_OBJS = \
 	$(OUTDIR)/easylogging++.obj \
 	$(OUTDIR)/island_tree.obj \
 	$(OUTDIR)/kml_writer.obj \
+	$(OUTDIR)/kml_writer_2.obj \
 	$(OUTDIR)/latlng.obj \
 	$(OUTDIR)/line_tree.obj \
 	$(OUTDIR)/merge_divide_trees.obj \
@@ -126,6 +128,7 @@ DEM_METRICS_OBJS = \
 	$(OUTDIR)/isolation_finder.obj \
 	$(OUTDIR)/isolation_results.obj \
 	$(OUTDIR)/kml_writer.obj \
+	$(OUTDIR)/kml_writer_2.obj \
 	$(OUTDIR)/latlng.obj \
 	$(OUTDIR)/line_tree.obj \
 	$(OUTDIR)/peakbagger_point.obj \

@@ -27,6 +27,7 @@
 #include "easylogging++.h"
 #include "island_tree.h"
 #include "kml_writer.h"
+#include "kml_writer_2.h"
 #include "line_tree.h"
 #include "util.h"
 
@@ -919,6 +920,147 @@ string DivideTree::getAsKml() const {
   writer.startFolder("Runoffs");
   index = 0;
   for (const Runoff &runoff : mRunoffs) {
+    writer.addRunoff(runoff, std::to_string(index));
+    index += 1;
+  }
+  writer.endFolder();
+
+  return writer.finish();
+}
+
+
+std::string DivideTree::getAsKmlWithPopups() const
+{
+  LineTree lineTree(*this);
+  lineTree.build();
+  IslandTree islandTree(*this);
+  islandTree.build();
+
+  std::vector<KMLPeakStyle> peakStyles;
+  peakStyles.push_back(KMLPeakStyle("prom1", "ff00ccff", 0.8));
+  peakStyles.push_back(KMLPeakStyle("prom2", "ff00ccff", 1.0));
+  peakStyles.push_back(KMLPeakStyle("prom3", "ff00ccff", 1.2));
+  peakStyles.push_back(KMLPeakStyle("prom4", "ff00ccff", 1.4));
+  peakStyles.push_back(KMLPeakStyle("prom5", "ff00ccff", 1.6));
+  KMLWriter2 writer(mCoordinateSystem, peakStyles);
+
+  // Graph edges
+  writer.startFolder("Edges");
+  int index = 0;
+  for (const Node& node : mNodes) {
+    if (node.saddleId != Node::Null) {
+      writer.addGraphEdge(getPeak(index), getPeak(node.parentId), getSaddle(node.saddleId));
+    }
+    index += 1;
+  }
+
+  // Runoff edges
+  for (int i = 0; i < (int)mRunoffEdges.size(); ++i) {
+    const Runoff& runoff = mRunoffs[i];
+    if (mRunoffEdges[i] != Node::Null) {
+      writer.addRunoffEdge(getPeak(mRunoffEdges[i]), runoff);
+    }
+  }
+  writer.endFolder();
+
+  // Peaks
+  const std::vector<IslandTree::Node>& inodes = islandTree.nodes();
+  writer.startFolder("Peaks");
+  index = 0;
+  for (const Peak& peak : mPeaks) {
+    index += 1;
+    std::ostringstream out;
+    out.precision(1);
+    out << std::fixed << feetToMeters(peak.elevation);
+
+    LatLng pcoords = mCoordinateSystem.getLatLng(peak.location);
+
+	float prom = feetToMeters(inodes[index].prominence);
+	std::string peakStyle = "";
+	if (prom > 500) peakStyle = "prom5";
+	else if (prom > 250) peakStyle = "prom4";
+	else if (prom > 100) peakStyle = "prom3";
+	else if (prom > 50)  peakStyle = "prom2";
+	else                 peakStyle = "prom1";
+
+    std::ostringstream desc;
+    desc.precision(1);
+    desc << "<![CDATA[";
+    desc << "<table width=\"200rem\">";
+    desc << "<tr><td><b>Elevation</b></td><td>" << std::fixed << feetToMeters(peak.elevation) << " m</td></tr>";
+    desc << "<tr><td><b>Prominence</b></td><td>" << std::fixed << feetToMeters(inodes[index].prominence) << " m</td></tr>";
+    desc << "<tr><td><b>Key saddle</b></td><td>";
+    if (inodes[index].keySaddleId != IslandTree::Node::Null) {
+      const Saddle& saddle = mSaddles[inodes[index].keySaddleId - 1];
+      LatLng coords = mCoordinateSystem.getLatLng(saddle.location);
+      desc << "<a href=\"#saddle_" << inodes[index].keySaddleId << ";flyto\"> ";
+      desc << std::fixed << feetToMeters(saddle.elevation) << " m</a>";
+      desc << " (" << std::fixed << coords.distanceEllipsoid(pcoords) * 0.001 << " km)";
+    }
+    else {
+      desc << "-";
+    }
+    desc << "</td></tr>";
+    desc << "<tr><td><b>Parent-line</b></td><td>";
+    if (lineTree.getLineParent(index) > 0) {
+      const Peak& parent = mPeaks[lineTree.getLineParent(index) - 1];
+      LatLng coords = mCoordinateSystem.getLatLng(parent.location);
+      desc << "<a href=\"#peak_" << lineTree.getLineParent(index) << ";flyto\"> ";
+      desc << std::fixed << feetToMeters(parent.elevation) << " m</a>";
+      desc << " (" << std::fixed << coords.distanceEllipsoid(pcoords) * 0.001 << " km)";
+    }
+    else {
+      desc << "-";
+    }
+    desc << "</td></tr>";
+    desc << "<tr><td><b>Parent-island</b></td><td>";
+    if (inodes[index].parentId != IslandTree::Node::Null) {
+      const Peak& parent = mPeaks[inodes[index].parentId - 1];
+      LatLng coords = mCoordinateSystem.getLatLng(parent.location);
+      desc << "<a href=\"#peak_" << inodes[index].parentId << ";flyto\"> ";
+      desc << std::fixed << feetToMeters(parent.elevation) << " m</a>";
+      desc << " (" << std::fixed << coords.distanceEllipsoid(pcoords) * 0.001 << " km)";
+    }
+    else {
+      desc << "-";
+    }
+    desc << "</td></tr>";
+    desc << "</table>";
+    desc << "]]>";
+
+    writer.addPeak(peak, peakStyle, out.str(), desc.str(), index);
+  }
+  writer.endFolder();
+
+  // Prom saddles
+  writer.startFolder("Prom saddles");
+  index = 0;
+  for (const Saddle& saddle : mSaddles) {
+    index += 1;
+    if (saddle.type == Saddle::Type::PROM) {
+      std::ostringstream out;
+      out.precision(1);
+      out << std::fixed << feetToMeters(saddle.elevation);
+      writer.addPromSaddle(saddle, out.str(), index);
+    }
+  }
+  writer.endFolder();
+
+  // Basin saddles
+  writer.startFolder("Basin saddles");
+  index = 0;
+  for (const Saddle& saddle : mSaddles) {
+    index += 1;
+    if (saddle.type == Saddle::Type::BASIN) {
+      writer.addBasinSaddle(saddle, std::to_string(index));
+    }
+  }
+  writer.endFolder();
+
+  // Runoffs
+  writer.startFolder("Runoffs");
+  index = 0;
+  for (const Runoff& runoff : mRunoffs) {
     writer.addRunoff(runoff, std::to_string(index));
     index += 1;
   }

@@ -50,6 +50,8 @@ public:
   // prominence.
   bool saddleHasMinProminence(int saddleId, Elevation minProminence);
 
+  int getLineParent(int peakId) const;
+
 private:
   struct Node {
     int parentId;

@@ -173,7 +173,7 @@ int main(int argc, char** argv) {
 		delete tile;
 		return -1;
 	}
-	fprintf(file, "%s", divideTree->getAsKml().c_str());
+	fprintf(file, "%s", divideTree->getAsKmlWithPopups().c_str());
 	fclose(file);
 
 	// Build new island tree on pruned divide tree to get final prominence values

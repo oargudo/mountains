@@ -75,6 +75,7 @@ PROMINENCE_OBJS = \
 	$(OUTDIR)/filter.o \
 	$(OUTDIR)/island_tree.o \
 	$(OUTDIR)/kml_writer.o \
+	$(OUTDIR)/kml_writer_2.o \
 	$(OUTDIR)/latlng.o \
 	$(OUTDIR)/line_tree.o \
 	$(OUTDIR)/peakbagger_collection.o \
@@ -94,6 +95,7 @@ MERGE_DIVIDE_TREES_OBJS = \
 	$(OUTDIR)/easylogging++.o \
 	$(OUTDIR)/island_tree.o \
 	$(OUTDIR)/kml_writer.o \
+	$(OUTDIR)/kml_writer_2.o \
 	$(OUTDIR)/latlng.o \
 	$(OUTDIR)/line_tree.o \
 	$(OUTDIR)/merge_divide_trees.o \
@@ -106,9 +108,28 @@ FILTER_POINTS_OBJS = \
 	$(OUTDIR)/filter_points.o \
 	$(POINTLIB) \
 
+DEM_METRICS_OBJS = \
+	$(OUTDIR)/coordinate_system.o \
+	$(OUTDIR)/dem_metrics.o \
+	$(OUTDIR)/divide_tree.o \
+	$(OUTDIR)/domain_map.o \
+	$(OUTDIR)/easylogging++.o \
+	$(OUTDIR)/island_tree.o \
+	$(OUTDIR)/isolation_finder.o \
+	$(OUTDIR)/isolation_results.o \
+	$(OUTDIR)/kml_writer.o \
+	$(OUTDIR)/kml_writer_2.o \
+	$(OUTDIR)/latlng.o \
+	$(OUTDIR)/line_tree.o \
+	$(OUTDIR)/peakbagger_point.o \
+	$(OUTDIR)/point_map.o \
+	$(OUTDIR)/tile.o \
+	$(OUTDIR)/tile_cache.o \
+	$(OUTDIR)/tree_builder.o \
+	$(POINTLIB) \
 
 all : makedirs $(OUTDIR)/isolation $(OUTDIR)/prominence $(OUTDIR)/merge_divide_trees \
-	 $(OUTDIR)/filter_points
+	 $(OUTDIR)/filter_points $(OUTDIR)/dem_metrics 
 
 $(POINTLIB) : $(POINTLIB_OBJS)
 	$(AR) $@ $^ 
@@ -124,6 +145,9 @@ $(OUTDIR)/merge_divide_trees: $(MERGE_DIVIDE_TREES_OBJS)
 
 $(OUTDIR)/filter_points: $(FILTER_POINTS_OBJS)
 	$(LINK) $^ $(LIBS) -o $@ $(LINKFLAGS)
+
+$(OUTDIR)/dem_metrics: $(DEM_METRICS_OBJS)
+	$(LINK) $** -OUT:$@ $(LIBS) $(LINKFLAGS)
 
 $(OUTDIR)/%.o : $(SOURCEDIR)/%.cpp
 	$(CC) $(CFLAGS) -I $(SOURCEDIR) -o $@ -c $< 

@@ -224,6 +224,10 @@ bool LineTree::saddleHasMinProminence(int saddleId, Elevation minProminence) {
   return mSaddleInfo[saddleId - 1].saddleProminence >= minProminence;
 }
 
+int LineTree::getLineParent(int peakId) const {
+  return mNodes[peakId].parentId;
+}
+
 void LineTree::reversePath(int startPeakId, int endPeakId) {
   if (startPeakId != endPeakId) {
     int saddleOwnerId = mNodes[startPeakId].saddleId;

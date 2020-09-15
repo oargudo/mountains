@@ -104,6 +104,7 @@ public:
   void debugPrint() const;
 
   std::string getAsKml() const;
+  std::string getAsKmlWithPopups() const;
 
   const CoordinateSystem &coordinateSystem() const;
   const std::vector<Peak> &peaks() const;
