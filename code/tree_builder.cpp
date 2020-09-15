@@ -310,9 +310,14 @@ void TreeBuilder::findRunoffs() {
 }
 
 DivideTree *TreeBuilder::generateDivideTree() {
-  CoordinateSystem coordinateSystem(mTile->minLatitude(), mTile->minLongitude(),
-                                    mTile->height() - 1,  // Remove overlap with neighbors
-                                    mTile->width() - 1);
+  // TO-DO: find cleaner way of managing non-degree tiles
+  // temp ugly hack for CoordinateSystem which assumes tiles of 1 degree,
+  // starts with offset 0 at maxLat, y points south, and sums to minLat
+  float tileMinLat = mTile->maxLatitude() - 1;
+  CoordinateSystem coordinateSystem(tileMinLat,
+	                                mTile->minLongitude(),
+                                    mTile->samplesPerDegreeLat(),
+                                    mTile->samplesPerDegreeLng());
   DivideTree *tree = new DivideTree(coordinateSystem, mPeaks, mSaddles, mRunoffs);
   
   int saddleIndex = 0;

@@ -40,6 +40,7 @@ enum FileFormat {
   FLT,  // NED (10m, 1/3 arcsecond)
   NED13_ZIP, // ZIP file containing FLT NED 1/3 arcsecond data
   NED1_ZIP,  // ZIP file containing FLT NED 1 arcsecond data
+  ASC, // Esri ASCII Raster format, arbitrary size and resolution
 };
 
 enum DataType {
@@ -112,6 +113,10 @@ public:
   // Nominal arcseconds per data sample
   float arcsecondsPerSample() const;
 
+  // Pixels per degree
+  int samplesPerDegreeLat() const;
+  int samplesPerDegreeLng() const;
+
   // Flip elevations so that depressions and mountains are swapped.
   // No-data values are left unchanged.
   void flipElevations();
@@ -122,6 +127,8 @@ public:
   static Tile *loadFromNED13ZipFile(const std::string &directory, int minLat, int minLng);
   // NED 1 arcsecond zip file containing a .flt file
   static Tile *loadFromNED1ZipFile(const std::string &directory, int minLat, int minLng);
+  // ASCII Grid format, single file, arbitrary resolution and dimensions
+  static Tile* loadFromASCFile(const std::string& filename);
 
   // Missing data in source
   static const Elevation NODATA_ELEVATION = -32768;

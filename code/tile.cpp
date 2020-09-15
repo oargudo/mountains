@@ -27,7 +27,7 @@
 #include "util.h"
 
 #include "easylogging++.h"
-
+#include <iostream>
 #include <algorithm>
 #include <assert.h>
 #include <stdio.h>
@@ -87,6 +87,14 @@ int Tile::numVerticalSamplesForDistance(float distance) const {
 
 float Tile::arcsecondsPerSample() const {
   return mArcsecondsPerSample;
+}
+
+int Tile::samplesPerDegreeLat() const {
+	return (int)(round(3600 / mArcsecondsPerSample));
+}
+
+int Tile::samplesPerDegreeLng() const {
+	return samplesPerDegreeLat();
 }
 
 void Tile::flipElevations() {
@@ -237,6 +245,90 @@ Tile *Tile::loadFromNED13ZipFile(const string &directory, int minLat, int minLng
 
 Tile *Tile::loadFromNED1ZipFile(const string &directory, int minLat, int minLng) {
   return loadFromNEDZipFileInternal(directory, minLat, minLng, FileFormat::NED1_ZIP);
+}
+
+Tile* Tile::loadFromASCFile(const std::string& filename) {
+
+  std::fstream infile(filename, std::fstream::in);
+
+  // read headers until we find a line starting with a float value
+  int ncols, nrows;
+  float minLat, minLon, cellSize, nodataval;
+  std::string line;
+  std::streampos linepos = infile.tellg();
+  bool centered = false;
+
+  while (std::getline(infile, line)) {
+
+    // get first "word" in the line
+    std::istringstream liness(line);
+    std::string s;
+    liness >> s;
+
+    // check if it is a float, in that case we finished headers
+    std::istringstream iss(s);
+    float f;
+    if ((iss >> std::ws >> f) && !iss.fail()) {
+      // return to the beginning of this line to read again the number
+      infile.seekg(linepos);
+      break;
+    }
+
+    // otherwise, read value and save to appropiate variable
+    if (s == "ncols")              
+	  liness >> ncols;
+    else if (s == "nrows")         
+	  liness >> nrows;
+	else if (s == "xllcorner")     
+	  liness >> minLon;
+	else if (s == "yllcorner")     
+	  liness >> minLat;
+	else if (s == "xllcenter") { 
+	  liness >> minLon; 
+	  centered = true; 
+	}
+	else if (s == "yllcenter") { 
+	  liness >> minLat; 
+	  centered = true; 
+	}
+    else if (s == "cellsize")
+	  liness >> cellSize;
+    else if (s == "nodata_value ") 
+	  liness >> nodataval;
+    else 
+	  VLOG(1) << "Unrecognized header string " << s;
+
+	// save current file position
+    linepos = infile.tellg();
+  }
+
+  // now read the elevation values
+  int num_samples = nrows * ncols;
+  Elevation* samples = new Elevation[num_samples];
+  for (int i = 0; i < num_samples; i++) {
+    // read elevation in meters, store as feet
+    double f;
+    infile >> f;
+    if (f > nodataval) samples[i] = (Elevation)(metersToFeet(f));
+    else               samples[i] = Tile::NODATA_ELEVATION;
+  }
+  infile.close();
+  
+  // build tile
+  Tile* tile = new Tile();
+  tile->mWidth = ncols;
+  tile->mHeight = nrows;
+  tile->mSamples = samples;
+  tile->mArcsecondsPerSample = cellSize * 3600.0;  // cellSize given in degrees
+
+  tile->mMinLat = minLat + (centered ? 0 : 0.5*cellSize);
+  tile->mMinLng = minLon + (centered ? 0 : 0.5*cellSize);
+  tile->mMaxLat = tile->mMinLat + cellSize * (nrows - 1);
+  tile->mMaxLng = tile->mMinLng + cellSize * (ncols - 1);
+
+  precomputeTileAfterLoad(tile);
+
+  return tile;
 }
 
 void Tile::precomputeTileAfterLoad(Tile *tile) {
