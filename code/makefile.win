@@ -116,10 +116,31 @@ FILTER_POINTS_OBJS = \
 	$(OUTDIR)/filter_points.obj \
 	$(POINTLIB) \
 
+DEM_METRICS_OBJS = \
+	$(OUTDIR)/coordinate_system.obj \
+	$(OUTDIR)/dem_metrics.obj \
+	$(OUTDIR)/divide_tree.obj \
+	$(OUTDIR)/domain_map.obj \
+	$(OUTDIR)/easylogging++.obj \
+	$(OUTDIR)/island_tree.obj \
+	$(OUTDIR)/isolation_finder.obj \
+	$(OUTDIR)/isolation_results.obj \
+	$(OUTDIR)/kml_writer.obj \
+	$(OUTDIR)/latlng.obj \
+	$(OUTDIR)/line_tree.obj \
+	$(OUTDIR)/peakbagger_point.obj \
+	$(OUTDIR)/point_map.obj \
+	$(OUTDIR)/tile.obj \
+	$(OUTDIR)/tile_cache.obj \
+	$(OUTDIR)/tree_builder.obj \
+	$(POINTLIB) \
+
 all : makedirs \
 	$(OUTDIR)/isolation.exe \
-	$(OUTDIR)/prominence.exe $(OUTDIR)/merge_divide_trees.exe \
+	$(OUTDIR)/prominence.exe \
+	$(OUTDIR)/merge_divide_trees.exe \
 	$(OUTDIR)/filter_points.exe \
+	$(OUTDIR)/dem_metrics.exe \
 
 $(POINTLIB): $(POINTLIB_OBJS)
 	$(AR) /OUT:$@ $**
@@ -134,6 +155,9 @@ $(OUTDIR)/merge_divide_trees.exe: $(MERGE_DIVIDE_TREES_OBJS)
 	$(LINK) $** -OUT:$@ $(LIBS) $(LINKFLAGS)
 
 $(OUTDIR)/filter_points.exe: $(FILTER_POINTS_OBJS)
+	$(LINK) $** -OUT:$@ $(LIBS) $(LINKFLAGS)
+
+$(OUTDIR)/dem_metrics.exe: $(DEM_METRICS_OBJS)
 	$(LINK) $** -OUT:$@ $(LIBS) $(LINKFLAGS)
 
 {$(SOURCEDIR)}.cpp{$(OUTDIR)}.obj::

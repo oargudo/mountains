@@ -57,7 +57,11 @@ class IsolationFinder {
 public:
   explicit IsolationFinder(TileCache *cache, const Tile *tile);
   
+  // Looks in neighboring tiles for higher ground, uses TileCache
   IsolationRecord findIsolation(Offsets peak) const;
+
+  // Looks for isolation inside the member Tile only, ignores the cache and neighbors
+  IsolationRecord findIsolationInTile(Offsets peak) const;
   
 private:
   

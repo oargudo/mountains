@@ -165,6 +165,12 @@ IsolationRecord IsolationFinder::findIsolation(Offsets peak) const {
   return record;
 }
 
+IsolationRecord IsolationFinder::findIsolationInTile(Offsets peak) const {
+  LatLng coords = mTile->latlng(peak);
+  Elevation elev = mTile->get(peak);
+  return findIsolation(mTile, &coords, peak, elev);
+}
+
 IsolationRecord IsolationFinder::findIsolation(const Tile *tile, const LatLng *peakLocation, Offsets seedPoint, Elevation seedElevation) const {
   IsolationRecord record;
   
@@ -332,6 +338,11 @@ IsolationRecord IsolationFinder::checkNeighboringTile(int lat, int lng, const La
                                                       Offsets seedCoords, Elevation elev) const {
   VLOG(2) << "Possibly considering neighbor tile " << lat << " " << lng;
   
+  // Go back if cache is not initialized (e.g. single tile execution)
+  if (!mCache) {
+	return IsolationRecord();
+  }
+
   // Don't even bother loading tile if we know if's all lower ground
   int maxElevation;
   if (mCache->getMaxElevation(lat, lng, &maxElevation) && elev > maxElevation) {
