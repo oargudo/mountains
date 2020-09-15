@@ -11,7 +11,7 @@ CP = copy
 RM = del /q
 RMDIR = rmdir
 MV = rename
-MKDIR = mkdir -p
+MKDIR = mkdir
 
 SOURCEDIR = .
 
