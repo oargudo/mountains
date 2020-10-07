@@ -76,6 +76,7 @@ PROMINENCE_OBJS = \
 	$(OUTDIR)/island_tree.o \
 	$(OUTDIR)/kml_writer.o \
 	$(OUTDIR)/kml_writer_2.o \
+	$(OUTDIR)/text_writer.o \
 	$(OUTDIR)/latlng.o \
 	$(OUTDIR)/line_tree.o \
 	$(OUTDIR)/peakbagger_collection.o \
@@ -96,6 +97,7 @@ MERGE_DIVIDE_TREES_OBJS = \
 	$(OUTDIR)/island_tree.o \
 	$(OUTDIR)/kml_writer.o \
 	$(OUTDIR)/kml_writer_2.o \
+	$(OUTDIR)/text_writer.o \
 	$(OUTDIR)/latlng.o \
 	$(OUTDIR)/line_tree.o \
 	$(OUTDIR)/merge_divide_trees.o \
@@ -119,6 +121,7 @@ DEM_METRICS_OBJS = \
 	$(OUTDIR)/isolation_results.o \
 	$(OUTDIR)/kml_writer.o \
 	$(OUTDIR)/kml_writer_2.o \
+	$(OUTDIR)/text_writer.o \
 	$(OUTDIR)/latlng.o \
 	$(OUTDIR)/line_tree.o \
 	$(OUTDIR)/peakbagger_point.o \

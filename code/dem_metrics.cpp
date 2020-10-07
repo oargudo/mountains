@@ -176,6 +176,15 @@ int main(int argc, char** argv) {
 	fprintf(file, "%s", divideTree->getAsKmlWithPopups().c_str());
 	fclose(file);
 
+	file = fopen((demName + "-divide_tree_pruned_" + std::to_string(int(minProminence))
+		+ ".txt").c_str(), "wb");
+	if (file == nullptr) {
+		delete tile;
+		return -1;
+	}
+	fprintf(file, "%s", divideTree->getAsText().c_str());
+	fclose(file);
+
 	// Build new island tree on pruned divide tree to get final prominence values
 	IslandTree prunedIslandTree(*divideTree);
 	prunedIslandTree.build();

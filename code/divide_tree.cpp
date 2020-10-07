@@ -28,6 +28,7 @@
 #include "island_tree.h"
 #include "kml_writer.h"
 #include "kml_writer_2.h"
+#include "text_writer.h"
 #include "line_tree.h"
 #include "util.h"
 
@@ -1068,3 +1069,109 @@ std::string DivideTree::getAsKmlWithPopups() const
 
   return writer.finish();
 }
+
+string DivideTree::getAsText() const {
+  TextWriter writer(mCoordinateSystem);
+
+  int index;
+
+  // Peaks
+  writer.startFolder("Peaks", mPeaks.size());
+  index = 0;
+  for (const Peak &peak : mPeaks) {
+    writer.addPeak(peak, std::to_string(index));
+    index += 1;
+  }
+  writer.endFolder();
+
+  unsigned int numPromSaddles = 0;
+  unsigned int numBasinSaddles = 0;
+  for (const Saddle &saddle : mSaddles) {
+    switch (saddle.type) {
+      case Saddle::Type::PROM: 
+        numPromSaddles++; 
+        break;
+      case Saddle::Type::BASIN:
+        numBasinSaddles++; 
+        break;
+    }
+  }
+
+
+  // Prom saddles
+  writer.startFolder("PromSaddles", numPromSaddles);
+  std::vector<int> promSaddleId(mSaddles.size(), -1);
+  index = 0;
+  int idSaddle = 0;
+  for (const Saddle &saddle : mSaddles) {
+    if (saddle.type == Saddle::Type::PROM) {
+      promSaddleId[index] = idSaddle;
+      writer.addPromSaddle(saddle, std::to_string(idSaddle));
+      idSaddle += 1;
+    }
+    index += 1;
+  }
+  writer.endFolder();
+
+  // Basin saddles
+  writer.startFolder("BasinSaddles", numBasinSaddles);
+  std::vector<int> basinSaddleId(mSaddles.size(), -1);
+  index = 0;
+  idSaddle = 0;
+  for (const Saddle &saddle : mSaddles) {
+    if (saddle.type == Saddle::Type::BASIN) {
+      basinSaddleId[index] = idSaddle;
+      writer.addBasinSaddle(saddle, std::to_string(index));
+      idSaddle += 1;
+    }
+    index += 1;
+  }
+  writer.endFolder();
+
+
+  // Runoffs
+  writer.startFolder("Runoffs", mRunoffs.size());
+  index = 0;
+  for (const Runoff &runoff : mRunoffs) {
+    writer.addRunoff(runoff, std::to_string(index));
+    index += 1;
+  }
+  writer.endFolder();
+
+
+  // Graph edges
+  int numEdges = 0;
+  for (const Node &node : mNodes) {
+    if (node.saddleId != Node::Null && node.saddleId >= 0 && promSaddleId[node.saddleId] >= 0) {
+      numEdges++;
+    }
+  }
+  writer.startFolder("Edges", numEdges);
+  index = 0;
+  for (const Node &node : mNodes) {
+    if (node.saddleId != Node::Null && node.saddleId >= 0 && promSaddleId[node.saddleId] >= 0) {
+      writer.addGraphEdge(getPeak(index), getPeak(node.parentId), getSaddle(node.saddleId),
+                std::to_string(index), std::to_string(node.parentId), 
+                std::to_string(promSaddleId[node.saddleId]));
+    }
+    index += 1;
+  }
+
+  // Runoff edges
+  int numRunoffEdges = 0;
+  for (int i = 0; i < (int)mRunoffEdges.size(); ++i) {
+    if (mRunoffEdges[i] != Node::Null) {
+      numRunoffEdges++;
+    }
+  }
+  writer.startFolder("RunoffEdges", numRunoffEdges);
+  for (int i = 0; i < (int)mRunoffEdges.size(); ++i) {
+    if (mRunoffEdges[i] != Node::Null) {
+      writer.addRunoffEdge(getPeak(mRunoffEdges[i]), mRunoffs[i], std::to_string(mRunoffEdges[i]), std::to_string(i));
+    }
+  }
+  writer.endFolder();
+
+  return writer.finish();
+}
+

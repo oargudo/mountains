@@ -105,6 +105,7 @@ public:
 
   std::string getAsKml() const;
   std::string getAsKmlWithPopups() const;
+  std::string getAsText() const;
 
   const CoordinateSystem &coordinateSystem() const;
   const std::vector<Peak> &peaks() const;
