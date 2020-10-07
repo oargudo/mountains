@@ -72,17 +72,10 @@ void TextWriter::addRunoff(const Runoff &runoff, const std::string &name) {
 
 void TextWriter::addGraphEdge(const Peak &peak1, const Peak &peak2, const Saddle &saddle, 
                 const std::string& peakName, const std::string& parentName, const std::string& saddleName) {
-  LatLng peak1pos = mCoords.getLatLng(peak1.location);
-  LatLng saddlepos = mCoords.getLatLng(saddle.location);
-  LatLng peak2pos = mCoords.getLatLng(peak2.location);
-  
   mTxt += peakName + " " + parentName + " " + saddleName + "\n";
 }
 
 void TextWriter::addRunoffEdge(const Peak &peak, const Runoff &runoff, const std::string& peakName, const std::string& runoffName) {
-  LatLng peakpos = mCoords.getLatLng(peak.location);
-  LatLng runoffpos = mCoords.getLatLng(runoff.location);
-  
   mTxt += peakName + " " + runoffName + "\n";
 }
 
