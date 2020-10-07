@@ -51,7 +51,7 @@ INITIALIZE_EASYLOGGINGPP
 
 static void usage() {
 	printf("Usage:\n");
-	printf("  dem-metrics demFile\n");
+	printf("  dem_metrics demFile\n");
 	printf("  where demFile is the DEM we want to process \n");
 	printf("\n");
 	printf("  Options:\n");

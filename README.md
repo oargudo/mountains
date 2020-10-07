@@ -53,6 +53,50 @@ Map](https://viewer.nationalmap.gov/).
 Note that SRTM filenames reference the southwest corner of the tile,
 while NED filenames reference the northwest corner.
 
+
+### Single Dem Metrics
+
+Load any DEM of any size encoded as ASCII Grid (you can export .ASC from QGIS, for example).
+
+```
+dem_metrics.exe demFile
+
+Options:
+  -f format         Data format, choose ASC for ASCII Grid
+  -m min_prominence Minimum prominence threshold for output, default = 300ft
+  -o directory      Directory for output data
+  -t                Finalize (terminate) output tree: delete all runoffs and then prune
+```
+
+This will generate, apart from the .dvt and .kml files, a txt file summarizing all the peaks above the prominence threshold. First row is header (see below) and then one row per peak follows.
+```
+latitude,longitude,elevation in feet,key saddle latitude,key saddle longitude,prominence in feet,isolation latitude,isolation longitude,isolation in km
+```
+
+This program also exports the Divide Tree as a TXT including the lat/lng coordinates, easier to digest from other applications.
+The format is:
+```
+Peaks num_peaks
+[... num_peaks point lines]
+PromSaddles num_promSaddles
+[... num_promSaddles point lines]
+BasinSaddles num_basinSaddles
+[... num_basinSaddles point lines]
+Runoffs num_runoffs
+[... num_runoffs point lines]
+Edges num_edges
+peak_id peak_id saddle_id
+[...]
+RunoffEdges
+peak_id runoff_id
+```
+
+Each point line contains the following information (for peaks, saddles, runoffs):
+```
+id latitude longitude elevation_in_feet coord_x_in_dem coord_y_in_dem
+```
+
+
 ### Isolation
 
 ```
